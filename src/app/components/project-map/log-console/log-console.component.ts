@@ -213,6 +213,11 @@ export class LogConsoleComponent implements OnInit, AfterViewInit, OnDestroy {
       let node = this.nodesDataSource.getItems().find((n) => n.name.valueOf() === splittedCommand[1].valueOf());
       if (node) {
         if (this.regexStart.test(this.command)) {
+          if (node.status !== 'stopped' && node.status !== 'suspended') {
+            this.showCommand(`Node ${node.name} is already started.`);
+            return;
+          }
+
           this.showCommand(`Starting node ${splittedCommand[1]}...`);
           this.nodeService.start(this.server, node).subscribe(() => this.showCommand(`Node ${node.name} started.`));
         } else if (this.regexStop.test(this.command)) {

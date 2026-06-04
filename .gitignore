@@ -60,3 +60,15 @@ licenses.csv
 
 # external software
 /external
+
+# opencode agentic config (local/dev, never upstream)
+/.opencode/
+/AGENTS.md
+/opencode.json
+/openspec/
+
+# fork change documentation (local tracking, not upstream)
+/docs/
+
+# in-branch working notes
+/.atl/

@@ -28,7 +28,7 @@ export class ConsoleWrapperComponent implements OnInit {
   public isMinimized: boolean = false;
 
   public resizedWidth: number = 720;
-  public resizedHeight: number = 480;
+  public resizedHeight: number = 560;
 
   constructor(
     private consoleService: NodeConsoleService,
@@ -43,7 +43,7 @@ export class ConsoleWrapperComponent implements OnInit {
     this.themeService.getActualTheme() === 'light'
       ? (this.isLightThemeEnabled = true)
       : (this.isLightThemeEnabled = false);
-    this.style = { bottom: '20px', left: '80px', width: '720px', height: '460px' };
+    this.style = { bottom: '20px', left: '80px', width: `${this.resizedWidth}px`, height: `${this.resizedHeight}px` };
 
     this.consoleService.nodeConsoleTrigger.subscribe((node) => {
       this.addTab(node, true);
@@ -71,6 +71,13 @@ export class ConsoleWrapperComponent implements OnInit {
     if (selectAfterAdding) {
       this.selected.setValue(this.nodes.length);
     }
+
+    setTimeout(() => {
+      this.consoleService.consoleResized.next({
+        width: this.resizedWidth,
+        height: this.resizedHeight - 53,
+      });
+    });
 
     this.consoleService.openConsoles++;
   }

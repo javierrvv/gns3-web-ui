@@ -6,7 +6,6 @@ import { Node } from '../../../cartography/models/node';
 import { Project } from '../../../models/project';
 import { Server } from '../../../models/server';
 import { NodeConsoleService } from '../../../services/nodeConsole.service';
-import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
@@ -21,18 +20,13 @@ export class WebConsoleComponent implements OnInit, AfterViewInit {
 
   public term: Terminal = new Terminal();
   public fitAddon: FitAddon = new FitAddon();
-  public isLightThemeEnabled: boolean = false;
   private copiedText: string = '';
 
   @ViewChild('terminal') terminal: ElementRef;
 
-  constructor(private consoleService: NodeConsoleService, private themeService: ThemeService) {}
+  constructor(private consoleService: NodeConsoleService) {}
 
   ngOnInit() {
-    this.themeService.getActualTheme() === 'light'
-      ? (this.isLightThemeEnabled = true)
-      : (this.isLightThemeEnabled = false);
-
     this.consoleService.consoleResized.subscribe((ev) => {
       let numberOfColumns = Math.floor(ev.width / 9);
       let numberOfRows = Math.floor(ev.height / 17);
@@ -50,8 +44,7 @@ export class WebConsoleComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.term.open(this.terminal.nativeElement);
-    if (this.isLightThemeEnabled)
-      this.term.setOption('theme', { background: 'white', foreground: 'black', cursor: 'black' });
+    this.term.setOption('theme', { background: '#000000', foreground: '#ffffff', cursor: '#ffffff' });
 
     const socket = new WebSocket(this.consoleService.getUrl(this.server, this.node));
 
@@ -69,13 +62,27 @@ export class WebConsoleComponent implements OnInit, AfterViewInit {
     this.fitAddon.activate(this.term);
     this.term.focus();
 
-    this.term.attachCustomKeyEventHandler((key: KeyboardEvent) => {
-      if (key.code === 'KeyC' || key.code === 'KeyV') {
-        if (key.ctrlKey && key.shiftKey) {
-          return false;
-        }
-      }
-      return true;
-    });
+    this.term.attachCustomKeyEventHandler((key: KeyboardEvent) => this.handleClipboardShortcut(key));
+  }
+
+  private handleClipboardShortcut(key: KeyboardEvent): boolean {
+    if (!key.ctrlKey || key.shiftKey || key.altKey || key.metaKey) return true;
+
+    if (key.code === 'KeyC') {
+      const selection = this.term.getSelection();
+      if (!selection) return true;
+
+      navigator.clipboard.writeText(selection);
+      return false;
+    }
+
+    if (key.code === 'KeyV') {
+      navigator.clipboard.readText().then((text) => {
+        if (text) this.term.paste(text);
+      });
+      return false;
+    }
+
+    return true;
   }
 }

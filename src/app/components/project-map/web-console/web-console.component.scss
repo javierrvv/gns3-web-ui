@@ -1,4 +1,6 @@
-.lightTheme {
-  background: white !important;
-  color: black !important;
+.web-console-terminal,
+.web-console-terminal .xterm,
+.web-console-terminal .xterm-viewport,
+.web-console-terminal .xterm-screen {
+  background: #000000 !important;
 }

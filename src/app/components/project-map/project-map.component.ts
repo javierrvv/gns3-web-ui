@@ -76,6 +76,7 @@ import { NavigationDialogComponent } from '../projects/navigation-dialog/navigat
 import { SaveProjectDialogComponent } from '../projects/save-project-dialog/save-project-dialog.component';
 import { NodeAddedEvent } from '../template/template-list-dialog/template-list-dialog.component';
 import { TopologySummaryComponent } from '../topology-summary/topology-summary.component';
+import { ContextConsoleMenuComponent } from './context-console-menu/context-console-menu.component';
 import { ContextMenuComponent } from './context-menu/context-menu.component';
 import { NodeCreatedLabelStylesFixer } from './helpers/node-created-label-styles-fixer';
 import { HideManagementLinksDialogComponent } from './hide-management-links-dialog/hide-management-links-dialog.component';
@@ -128,6 +129,7 @@ export class ProjectMapComponent implements OnInit, OnDestroy {
   public isLightThemeEnabled: boolean = false;
 
   @ViewChild(ContextMenuComponent) contextMenu: ContextMenuComponent;
+  @ViewChild(ContextConsoleMenuComponent) contextConsoleMenu: ContextConsoleMenuComponent;
   @ViewChild(D3MapComponent) mapChild: D3MapComponent;
   @ViewChild(ProjectMapMenuComponent) projectMapMenuComponent: ProjectMapMenuComponent;
   @ViewChild('topologySummaryContainer', {read: ViewContainerRef}) topologySummaryContainer: ViewContainerRef;
@@ -644,6 +646,13 @@ export class ProjectMapComponent implements OnInit, OnDestroy {
       this.contextMenu.openMenuForNode(node, position.top, position.left);
     });
 
+    const onNodeContextConsoleMenu = this.nodeWidget.onContextConsoleMenu.subscribe((eventNode: NodeContextMenu) => {
+      if (this.projectService.isReadOnly(this.project)) return;
+
+      const node = this.mapNodeToNode.convert(eventNode.node);
+      this.contextConsoleMenu.openWebConsoleForNode(node);
+    });
+
     const onDrawingContextMenu = this.drawingsWidget.onContextMenu.subscribe((eventDrawing: DrawingContextMenu) => {
       const drawing = this.mapDrawingToDrawing.convert(eventDrawing.drawing);
       const position = this.getContextMenuPosition(eventDrawing.event);
@@ -700,6 +709,7 @@ export class ProjectMapComponent implements OnInit, OnDestroy {
     this.projectMapSubscription.add(onEthernetLinkContextMenu);
     this.projectMapSubscription.add(onSerialLinkContextMenu);
     this.projectMapSubscription.add(onNodeContextMenu);
+    this.projectMapSubscription.add(onNodeContextConsoleMenu);
     this.projectMapSubscription.add(onDrawingContextMenu);
     this.projectMapSubscription.add(onContextMenu);
     this.projectMapSubscription.add(onLabelContextMenu);

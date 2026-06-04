@@ -29,7 +29,7 @@ export class StartNodeActionComponent implements OnInit, OnChanges {
   }
 
   startNodes() {
-    this.nodes.forEach((node) => {
+    this.nodes.filter((node) => node.status === 'stopped' || node.status === 'suspended').forEach((node) => {
       this.nodeService.start(this.server, node).subscribe(
         (n: Node) => {},
         (error) => {

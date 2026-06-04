@@ -89,18 +89,32 @@ export class WebConsoleFullWindowComponent implements OnInit {
       this.fitAddon.fit();
       this.term.focus();
 
-      this.term.attachCustomKeyEventHandler((key: KeyboardEvent) => {
-        if (key.code === 'KeyC' || key.code === 'KeyV') {
-          if (key.ctrlKey && key.shiftKey) {
-            return false;
-          }
-        }
-        return true;
-      });
+      this.term.attachCustomKeyEventHandler((key: KeyboardEvent) => this.handleClipboardShortcut(key));
 
       let numberOfColumns = Math.round(window.innerWidth / this.consoleService.getLineWidth());
       let numberOfRows = Math.round(window.innerHeight / this.consoleService.getLineHeight());
       this.term.resize(numberOfColumns, numberOfRows);
     }, 0);
+  }
+
+  private handleClipboardShortcut(key: KeyboardEvent): boolean {
+    if (!key.ctrlKey || key.shiftKey || key.altKey || key.metaKey) return true;
+
+    if (key.code === 'KeyC') {
+      const selection = this.term.getSelection();
+      if (!selection) return true;
+
+      navigator.clipboard.writeText(selection);
+      return false;
+    }
+
+    if (key.code === 'KeyV') {
+      navigator.clipboard.readText().then((text) => {
+        if (text) this.term.paste(text);
+      });
+      return false;
+    }
+
+    return true;
   }
 }

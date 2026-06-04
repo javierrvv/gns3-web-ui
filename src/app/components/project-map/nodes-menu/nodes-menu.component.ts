@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import { MapSettingsService } from '../../../services/mapsettings.service';
 import { ElectronService } from 'ngx-electron';
 import { NodesDataSource } from '../../../cartography/datasources/nodes-datasource';
@@ -61,9 +62,21 @@ export class NodesMenuComponent {
   }
 
   startNodes() {
-    this.nodeService.startAll(this.server, this.project).subscribe(() => {
-      this.toasterService.success('All nodes successfully started');
-    });
+    const nodesToStart = this.nodesDataSource.getItems().filter((node) => node.status === 'stopped' || node.status === 'suspended');
+
+    if (nodesToStart.length === 0) {
+      this.toasterService.success('All nodes are already started');
+      return;
+    }
+
+    forkJoin(nodesToStart.map((node) => this.nodeService.start(this.server, node))).subscribe(
+      () => {
+        this.toasterService.success('All stopped nodes successfully started');
+      },
+      (error) => {
+        this.toasterService.error(error.error.message);
+      }
+    );
   }
 
   stopNodes() {

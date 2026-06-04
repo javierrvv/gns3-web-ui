@@ -15,7 +15,7 @@ export class NodeConsoleService {
   public openConsoles: number = 0;
 
   public readonly defaultConsoleWidth = 720;
-  public readonly defaultConsoleHeight = 408;
+  public readonly defaultConsoleHeight = 507;
 
   public readonly defaultNumberOfColumns = 80;
   public readonly defaultNumberOfRows = 24;

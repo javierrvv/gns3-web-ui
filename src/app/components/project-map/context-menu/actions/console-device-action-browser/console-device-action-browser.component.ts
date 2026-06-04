@@ -2,7 +2,9 @@ import { Component, Input } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { Node } from '../../../../../cartography/models/node';
 import { Server } from '../../../../../models/server';
+import { MapSettingsService } from '../../../../../services/mapsettings.service';
 import { NodeService } from '../../../../../services/node.service';
+import { NodeConsoleService } from '../../../../../services/nodeConsole.service';
 import { ToasterService } from '../../../../../services/toaster.service';
 import { ProtocolHandlerService } from '../../../../../services/protocol-handler.service';
 
@@ -16,13 +18,33 @@ export class ConsoleDeviceActionBrowserComponent {
   @Input() server: Server;
   @Input() node: Node;
 
-  constructor(private toasterService: ToasterService, private nodeService: NodeService, private protocolHandlerService: ProtocolHandlerService) {}
+  constructor(
+    private toasterService: ToasterService,
+    private nodeService: NodeService,
+    private nodeConsoleService: NodeConsoleService,
+    private mapSettingsService: MapSettingsService,
+    private protocolHandlerService: ProtocolHandlerService
+  ) {}
 
   openConsole(auxiliary: boolean = false) {
     this.nodeService.getNode(this.server, this.node).subscribe((node: Node) => {
       this.node = node;
-      this.startConsole(auxiliary);
+      if (auxiliary) {
+        this.startConsole(auxiliary);
+      } else {
+        this.openWebConsole();
+      }
     });
+  }
+
+  openWebConsole() {
+    if (this.node.status !== 'started') {
+      this.toasterService.error('To open console please start the node');
+      return;
+    }
+
+    this.mapSettingsService.logConsoleSubject.next(true);
+    this.nodeConsoleService.openConsoleForNode(this.node);
   }
 
   startConsole(auxiliary: boolean) {

@@ -79,6 +79,16 @@ export class ContextConsoleMenuComponent implements OnInit {
     }
   }
 
+  public openConsoleForNode(node: Node) {
+    this.node = node;
+    this.openConsole();
+  }
+
+  public openWebConsoleForNode(node: Node) {
+    this.node = node;
+    this.openWebConsole();
+  }
+
   openConsole() {
     this.mapSettingsService.setConsoleContextMenuAction('console');
     if (this.isElectronApp) {
